@@ -4,7 +4,7 @@ import { cookies } from "next/headers"
 const JWT_SECRET = process.env.JWT_SECRET!
 
 export type AuthPayload = {
-  userId: number
+  userId: string
   role: "BUYER" | "SELLER" | "ADMIN"
 }
 
