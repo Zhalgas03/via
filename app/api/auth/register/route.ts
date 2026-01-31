@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         email,
         password: hashed,
         name: name ?? null,
-        role: safeRole, // ✅ ТЕПЕРЬ НЕ ХАРДКОД
+        role: safeRole,
       },
     })
 

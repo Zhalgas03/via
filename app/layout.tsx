@@ -31,7 +31,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-dark text-light`}
       >
         <NavbarWrapper />
-        {children}
+
+        {/* 👇 ТОЛЬКО КОНТЕНТ ОГРАНИЧЕН */}
+        <main className="page-container">
+          {children}
+        </main>
       </body>
     </html>
   )

@@ -24,3 +24,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+body {
+  padding-bottom: 56px;
+}
+
+/* Контейнер для контента */
+.page-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Только desktop */
+@media (min-width: 1024px) {
+  .page-container {
+    max-width: 1200px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+.navbar-inner {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* desktop */
+@media (min-width: 1024px) {
+  .navbar-inner {
+    max-width: 1200px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+.navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  width: 100%;
+
+}

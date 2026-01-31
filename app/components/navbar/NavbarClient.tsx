@@ -3,14 +3,26 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import UserMenu from "./UserMenu"
-
+import BottomNav from "./BottomNav"
+import MobileDrawer from "./MobileDrawer"
+import { useIsMobile } from "@/app/hooks/useIsMobile"
+import {
+  CubeIcon,
+  TruckIcon,
+  ShoppingCartIcon,
+} from "@heroicons/react/24/outline"
+import { usePathname } from "next/navigation"
 type User = {
   email: string
 }
 
 export default function NavbarClient() {
+  const isMobile = useIsMobile()
+  const pathname = usePathname()
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -23,12 +35,7 @@ export default function NavbarClient() {
         })
 
         if (!mounted) return
-
-        if (res.ok) {
-          setUser(await res.json())
-        } else {
-          setUser(null)
-        }
+        setUser(res.ok ? await res.json() : null)
       } catch {
         if (mounted) setUser(null)
       } finally {
@@ -37,53 +44,143 @@ export default function NavbarClient() {
     }
 
     loadUser()
-
-    const onAuthChange = () => {
-      setLoading(true)
-      loadUser()
-    }
-
-    window.addEventListener("auth-changed", onAuthChange)
+    window.addEventListener("auth-changed", loadUser)
 
     return () => {
       mounted = false
-      window.removeEventListener("auth-changed", onAuthChange)
+      window.removeEventListener("auth-changed", loadUser)
     }
   }, [])
 
   return (
-    <nav
-      className="navbar navbar-dark px-4"
-      style={{ backgroundColor: "#7a9432", height: 56 }}
-    >
-      {/* LEFT */}
-      <div className="d-flex align-items-center gap-4">
-        <Link href="/" className="navbar-brand fw-semibold text-white">
-          ViaMart
-        </Link>
+    <>
+      {/* ===== MOBILE ===== */}
+      {isMobile === true && (
+        <>
+          {/* TOP BAR */}
+          <nav
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 56,
+              background: "#7a9432",
+              display: "flex",
+              alignItems: "center",
+              padding: "0 16px",
+              zIndex: 1000,
+            }}
+          >
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="btn btn-sm text-white"
+            >
+              ☰
+            </button>
 
-        <Link href="/products" className="text-white text-decoration-none">
-          Товары
-        </Link>
+            <span
+              style={{
+                marginLeft: 12,
+                color: "#fff",
+                fontWeight: 600,
+              }}
+            >
+         
+            </span>
+          </nav>
 
-        <Link href="/suppliers" className="text-white text-decoration-none">
-          Поставщики
-        </Link>
+          {!loading && user && (
+            <MobileDrawer
+              open={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+              email={user.email}
+            />
+          )}
 
-        <Link href="/cart" className="text-white text-decoration-none">
-          Корзина
-        </Link>
-      </div>
+          <BottomNav />
+        </>
+      )}
 
-      {/* RIGHT */}
-      <div className="ms-auto">
-        {!loading && user && <UserMenu email={user.email} />}
-        {!loading && !user && (
-          <Link href="/login" className="text-white text-decoration-none">
-            Login
-          </Link>
-        )}
-      </div>
-    </nav>
+      {/* ===== DESKTOP ===== */}
+      {isMobile === false && (
+  <nav
+    className="navbar navbar-dark"
+    style={{
+      backgroundColor: "#7a9432",
+      height: 56,
+      position: "sticky",
+      top: 0,
+      zIndex: 1000,
+    }}
+  >
+    {/* ⬇️ ВОТ СЮДА КЛАСС */}
+<div className="navbar-inner d-flex align-items-center position-relative">
+  {/* LEFT */}
+<Link
+  href="/"
+  className="text-white fw-semibold text-[16px] text-decoration-none"
+>
+  ViaMart
+</Link>
+
+
+
+  {/* CENTER */}
+  
+  <div className="d-flex align-items-center gap-1 position-absolute top-50 start-50 translate-middle">
+  <Link
+    href="/products"
+    className={`
+      d-flex align-items-center gap-2 px-3 py-1.5 rounded-lg
+      text-white text-decoration-none
+      ${pathname === "/products" ? "bg-[#6f8f2e]" : ""}
+    `}
+  >
+    <CubeIcon className="w-4.5 h-4.5" strokeWidth={1.5} />
+    <span className="text-[14px] font-semibold">Товары</span>
+  </Link>
+
+  <Link
+    href="/suppliers"
+    className={`
+      d-flex align-items-center gap-2 px-3 py-1.5 rounded-lg
+      text-white text-decoration-none
+      ${pathname === "/suppliers" ? "bg-[#6f8f2e]" : ""}
+    `}
+  >
+    <TruckIcon className="w-4.5 h-4.5" strokeWidth={1.5} />
+    <span className="text-[14px] font-semibold">Поставщики</span>
+  </Link>
+
+  <Link
+    href="/cart"
+    className={`
+      d-flex align-items-center gap-2 px-3 py-1.5 rounded-lg
+      text-white text-decoration-none
+      ${pathname === "/cart" ? "bg-[#6f8f2e]" : ""}
+    `}
+  >
+    <ShoppingCartIcon className="w-4.5 h-4.5" strokeWidth={1.5} />
+    <span className="text-[14px] font-semibold">Корзина</span>
+  </Link>
+</div>
+
+
+  {/* RIGHT */}
+  <div className="ms-auto">
+    {!loading && user && <UserMenu email={user.email} />}
+    {!loading && !user && (
+      <Link href="/login" className="text-white text-decoration-none">
+        Login
+      </Link>
+    )}
+  </div>
+</div>
+
+  </nav>
+)}
+
+    </>
   )
 }

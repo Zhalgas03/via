@@ -41,13 +41,17 @@ export default function LoginPage() {
 
       const data = await res.json()
 
-      if (!res.ok || !data.success) {
-        setError(data.message || "Login failed")
-        return
-      }
+    if (!res.ok || !data.success) {
+    setError(data.message || "Login failed")
+    return
+    }
 
-      window.dispatchEvent(new Event("auth-changed"))
-      router.push("/")
+    // 🔐 сохраняем email для 2FA
+    sessionStorage.setItem("2fa-email", email)
+
+    // ➡️ идём на страницу ввода кода
+    router.push("/verify")
+
     } catch {
       setError("Network error")
     } finally {

@@ -13,11 +13,24 @@ export default function AuthCallbackPage() {
         return
       }
 
-      // 🔥 ВАЖНО: redirect, а не fetch
-      window.location.href =
-        `/api/auth/google?email=${encodeURIComponent(
-          data.user.email
-        )}&supabaseId=${data.user.id}`
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: data.user.email,
+          supabaseId: data.user.id,
+        }),
+      })
+
+      if (!res.ok) {
+        console.error("Google backend auth failed")
+        window.location.href = "/login"
+        return
+      }
+
+      window.dispatchEvent(new Event("auth-changed"))
+      window.location.href = "/"
     }
 
     run()

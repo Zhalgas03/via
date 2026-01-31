@@ -2,40 +2,49 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/app/lib/prisma"
 import jwt from "jsonwebtoken"
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
+export async function POST(req: Request) {
+  try {
+    const { email, name } = await req.json()
 
-  const email = searchParams.get("email")
-  const supabaseId = searchParams.get("supabaseId")
+    if (!email) {
+      return NextResponse.json(
+        { message: "Missing email" },
+        { status: 400 }
+      )
+    }
 
-  if (!email || !supabaseId) {
-    return NextResponse.redirect(new URL("/login", req.url))
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {
+        name,
+      },
+      create: {
+        email,
+        name,
+        role: "BUYER",
+      },
+    })
+
+    const token = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    )
+
+    const res = NextResponse.json({ success: true })
+
+    res.cookies.set("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    })
+
+    return res
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json(
+      { message: "Google auth failed" },
+      { status: 500 }
+    )
   }
-
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: { supabaseId },
-    create: {
-      email,
-      supabaseId,
-      role: "BUYER",
-    },
-  })
-
-  const token = jwt.sign(
-    { userId: user.id },
-    process.env.JWT_SECRET!,
-    { expiresIn: "7d" }
-  )
-
-  // 🔥 COOKIE СТАВИТСЯ ЗДЕСЬ
-  const res = NextResponse.redirect(new URL("/", req.url))
-
-  res.cookies.set("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-  })
-
-  return res
 }

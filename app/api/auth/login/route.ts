@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
 import { prisma } from "@/app/lib/prisma"
-
-const JWT_SECRET = process.env.JWT_SECRET!
+import { send2FACode } from "@/app/lib/mailer"
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +18,7 @@ export async function POST(req: Request) {
       where: { email },
     })
 
-    if (!user) {
+    if (!user || !user.password) {
       return NextResponse.json(
         { success: false, message: "Invalid email or password" },
         { status: 401 }
@@ -28,6 +26,7 @@ export async function POST(req: Request) {
     }
 
     const valid = await bcrypt.compare(password, user.password)
+
     if (!valid) {
       return NextResponse.json(
         { success: false, message: "Invalid email or password" },
@@ -35,34 +34,26 @@ export async function POST(req: Request) {
       )
     }
 
-    // 👇 JWT С РОЛЬЮ
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        role: user.role,
-      },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    )
+    // 🔐 ПАРОЛЬ ВЕРНЫЙ → ЗАПУСКАЕМ 2FA
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
 
-    const res = NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
+    await prisma.email2FACode.upsert({
+      where: { email },
+      update: {
+        code,
+        expires_at: new Date(Date.now() + 10 * 60 * 1000),
+      },
+      create: {
+        email,
+        code,
+        expires_at: new Date(Date.now() + 10 * 60 * 1000),
       },
     })
 
-    res.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    })
+    await send2FACode(email, code)
 
-    return res
+    // ❗ JWT ЗДЕСЬ НИКОГДА НЕ ВЫДАЁМ
+    return NextResponse.json({ success: true })
   } catch (e) {
     console.error("LOGIN ERROR:", e)
     return NextResponse.json(
