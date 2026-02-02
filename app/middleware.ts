@@ -6,22 +6,26 @@ const JWT_SECRET = process.env.JWT_SECRET!
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-
-  const isAuthPage =
-    pathname.startsWith("/login")
-
   const token = req.cookies.get("token")?.value
 
-  // 🔁 если уже залогинен — не пускаем на login
-  if (isAuthPage && token) {
+  const isLogin = pathname.startsWith("/login")
+
+  // 🔁 ROOT → products или login
+  if (pathname === "/") {
     return NextResponse.redirect(
-      new URL("/", req.url)
+      new URL(token ? "/products" : "/login", req.url)
+    )
+  }
+
+  // 🔁 если залогинен — не пускаем на login
+  if (isLogin && token) {
+    return NextResponse.redirect(
+      new URL("/products", req.url)
     )
   }
 
   // 🔒 защищённые страницы
   const protectedPaths = [
-    "/",
     "/products",
     "/suppliers",
     "/cart",
@@ -32,19 +36,16 @@ export function middleware(req: NextRequest) {
     p => pathname === p || pathname.startsWith(p + "/")
   )
 
-  // не защищённая — пускаем
   if (!isProtected) {
     return NextResponse.next()
   }
 
-  // защищённая, но без токена
   if (!token) {
     return NextResponse.redirect(
       new URL("/login", req.url)
     )
   }
 
-  // проверяем токен
   try {
     jwt.verify(token, JWT_SECRET)
     return NextResponse.next()
