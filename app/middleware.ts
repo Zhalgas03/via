@@ -2,20 +2,11 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import jwt from "jsonwebtoken"
 
-const JWT_SECRET = process.env.JWT_SECRET!
-
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const token = req.cookies.get("token")?.value
 
   const isLogin = pathname.startsWith("/login")
-
-  // 🔁 ROOT → products или login
-  if (pathname === "/") {
-    return NextResponse.redirect(
-      new URL(token ? "/products" : "/login", req.url)
-    )
-  }
 
   // 🔁 если залогинен — не пускаем на login
   if (isLogin && token) {
@@ -47,7 +38,7 @@ export function middleware(req: NextRequest) {
   }
 
   try {
-    jwt.verify(token, JWT_SECRET)
+    jwt.verify(token, process.env.JWT_SECRET!)
     return NextResponse.next()
   } catch {
     return NextResponse.redirect(
@@ -58,7 +49,6 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/",
     "/login",
     "/products/:path*",
     "/suppliers/:path*",
