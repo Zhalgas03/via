@@ -26,6 +26,7 @@ body {
 }
 body {
   padding-bottom: 56px;
+  background-color: #171717;
 }
 
 /* Контейнер для контента */
@@ -63,4 +64,37 @@ body {
   padding-right: 16px;
   width: 100%;
 
+}
+
+
+.dark-input {
+  background-color: #2e2e2e;
+  color: #e5e7eb;
+  border: 1px solid #3a3f44;
+  border-radius: 8px;
+  font-size: 14.5px;
+  padding: 8px 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.dark-input::placeholder {
+  color: #9ca3af;
+}
+
+.dark-input:hover {
+  border-color: #6b7280;
+}
+
+.dark-input:focus {
+  outline: none;
+  background-color: #2a2d2f;
+  border-color: #84cc16;
+  box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.25);
+  color: #ffffff;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
 }

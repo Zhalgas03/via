@@ -24,3 +24,94 @@ model Email2FACode {
   code        String
   expires_at DateTime
 }
+
+
+model Users {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model EmailLoginCode {
+  email     String
+  code      String
+  expiresAt DateTime
+
+  @@id([email, code])
+}
+
+
+
+model categories {
+  id    String @id @db.Uuid
+  name  String @unique
+  image String?
+}
+model Supplier {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  phone       String?
+  contactName String?  @map("contact_name")
+
+  products    Product[]
+
+  @@map("suppliers")
+}
+
+
+model Product {
+  id           String   @id @db.Uuid
+  name         String
+
+  article      String?
+  volumeLiters String?  @map("volume_liters")
+  category     String?
+
+  price        String?
+  imageUrl     String?  @map("image_url")
+  description  String?
+
+  packageCount String?  @map("package_count")
+
+  // ⬇️ СТАРОЕ ПОЛЕ — ОСТАВЛЯЕМ
+  supplier     String?
+
+  cartItems    CartItem[]
+
+  // ⬇️ НОВОЕ ПОЛЕ — ДЛЯ RELATION
+  supplierId   String?  @map("supplier_id")
+  supplierRel  Supplier? @relation(fields: [supplierId], references: [id])
+
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("products")
+}
+
+
+model Cart {
+  id         String     @id @default(uuid())
+  userId     String?    @map("user_id")
+  supplierId String     @map("supplier_id") // ← НОВОЕ
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  items      CartItem[]
+
+  @@unique([userId, supplierId]) // ← один заказ на поставщика
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+
+  cartId   String   @map("cart_id")
+  productId String  @map("product_id")
+
+  quantity Int      @default(1)
+  price    String   // цена на момент добавления
+
+  cart     Cart     @relation(fields: [cartId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}

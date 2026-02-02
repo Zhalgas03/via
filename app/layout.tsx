@@ -28,11 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-dark text-light`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased text-light`}
+        style={{ backgroundColor: "#171717" }}
       >
         <NavbarWrapper />
 
-        {/* 👇 ТОЛЬКО КОНТЕНТ ОГРАНИЧЕН */}
         <main className="page-container">
           {children}
         </main>
@@ -40,3 +40,4 @@ export default function RootLayout({
     </html>
   )
 }
+

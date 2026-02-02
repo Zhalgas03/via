@@ -1,6 +1,5 @@
 "use client"
 
-
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 
@@ -47,26 +46,24 @@ export default function VerifyPage() {
   }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  const pasted = e.clipboardData
-    .getData("text")
-    .replace(/\D/g, "")
-    .slice(0, 6)
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6)
 
-  if (!pasted) return
+    if (!pasted) return
 
-  const newCode = pasted.split("")
-  while (newCode.length < 6) newCode.push("")
+    const newCode = pasted.split("")
+    while (newCode.length < 6) newCode.push("")
 
-  setCode(newCode)
+    setCode(newCode)
 
-
-  const lastIndex = Math.min(pasted.length, 6) - 1
-  const last = document.getElementById(`otp-${lastIndex}`)
-  ;(last as HTMLInputElement)?.focus()
-}
-
+    const lastIndex = Math.min(pasted.length, 6) - 1
+    const last = document.getElementById(`otp-${lastIndex}`)
+    ;(last as HTMLInputElement)?.focus()
+  }
 
   const submit = async () => {
     const finalCode = code.join("")
@@ -103,30 +100,18 @@ export default function VerifyPage() {
       setLoading(false)
     }
   }
-useEffect(() => {
-  const finalCode = code.join("")
 
-  if (
-    finalCode.length === 6 &&
-    !loading &&
-    !submittedRef.current
-  ) {
-    submittedRef.current = true
-    submit()
-  }
-}, [code, loading])
-
+  // 🔥 авто-submit при вводе 6 цифр
+  useEffect(() => {
+    const finalCode = code.join("")
+    if (finalCode.length === 6 && !loading && !submittedRef.current) {
+      submittedRef.current = true
+      submit()
+    }
+  }, [code, loading])
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#7a9432",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <div style={pageStyle}>
       <div
         style={{
           width: 360,
@@ -137,7 +122,13 @@ useEffect(() => {
           color: "#fff",
         }}
       >
-        <h4 style={{ marginBottom: 8, fontWeight: 600, textAlign: "center" }}>
+        <h4
+          style={{
+            marginBottom: 8,
+            fontWeight: 600,
+            textAlign: "center",
+          }}
+        >
           Verify your login
         </h4>
 
@@ -225,4 +216,13 @@ useEffect(() => {
       </div>
     </div>
   )
+}
+
+const pageStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "#7a9432",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 }

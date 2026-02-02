@@ -24,6 +24,11 @@ export default function NavbarClient() {
   const [loading, setLoading] = useState(true)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+
+  const isActive = (base: string) =>
+  pathname === base || pathname.startsWith(base + "/")
+
+  
   useEffect(() => {
     let mounted = true
 
@@ -118,7 +123,7 @@ export default function NavbarClient() {
 <div className="navbar-inner d-flex align-items-center position-relative">
   {/* LEFT */}
 <Link
-  href="/"
+  href="/products"
   className="text-white fw-semibold text-[16px] text-decoration-none"
 >
   ViaMart
@@ -134,7 +139,7 @@ export default function NavbarClient() {
     className={`
       d-flex align-items-center gap-2 px-3 py-1.5 rounded-lg
       text-white text-decoration-none
-      ${pathname === "/products" ? "bg-[#6f8f2e]" : ""}
+      ${isActive("/products") ? "bg-[#6f8f2e]" : ""}
     `}
   >
     <CubeIcon className="w-4.5 h-4.5" strokeWidth={1.5} />
@@ -146,7 +151,7 @@ export default function NavbarClient() {
     className={`
       d-flex align-items-center gap-2 px-3 py-1.5 rounded-lg
       text-white text-decoration-none
-      ${pathname === "/suppliers" ? "bg-[#6f8f2e]" : ""}
+      ${isActive("/suppliers") ? "bg-[#6f8f2e]" : ""}
     `}
   >
     <TruckIcon className="w-4.5 h-4.5" strokeWidth={1.5} />
@@ -158,7 +163,7 @@ export default function NavbarClient() {
     className={`
       d-flex align-items-center gap-2 px-3 py-1.5 rounded-lg
       text-white text-decoration-none
-      ${pathname === "/cart" ? "bg-[#6f8f2e]" : ""}
+      ${isActive("/cart") ? "bg-[#6f8f2e]" : ""}
     `}
   >
     <ShoppingCartIcon className="w-4.5 h-4.5" strokeWidth={1.5} />

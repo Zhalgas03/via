@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/app/lib/auth"
-import { prisma } from "@/app/lib/prisma"
+import prisma from "@/app/lib/prisma"
 
 export default async function ProfilePage() {
   let auth
@@ -8,10 +8,10 @@ export default async function ProfilePage() {
   try {
     auth = await requireAuth()
   } catch {
-    redirect("/login") // ✅ ВАЖНО
+    redirect("/login")
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: auth.userId },
   })
 
@@ -20,10 +20,13 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div style={{ padding: 40 }}>
+    <div style={{ padding: "40px 0" }}>
       <h1>Profile</h1>
-      <p>{user.email}</p>
-      <p>{user.role}</p>
+      <p><strong>Email:</strong> {user.email}</p>
+      <p>
+        <strong>Joined:</strong>{" "}
+        {new Date(user.createdAt).toLocaleDateString()}
+      </p>
     </div>
   )
 }

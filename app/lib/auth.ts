@@ -5,11 +5,10 @@ const JWT_SECRET = process.env.JWT_SECRET!
 
 export type AuthPayload = {
   userId: string
-  role: "BUYER" | "SELLER" | "ADMIN"
 }
 
 export async function requireAuth(): Promise<AuthPayload> {
-  const cookieStore = await cookies()
+  const cookieStore = await cookies() 
   const token = cookieStore.get("token")?.value
 
   if (!token) {
